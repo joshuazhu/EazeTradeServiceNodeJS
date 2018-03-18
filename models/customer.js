@@ -1,12 +1,14 @@
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
+var jwt = require('jsonwebtoken');
 
 var CustomerSchema = new mongoose.Schema({
     name: String,
     address: String,
     phoneNumber: String,
     node: String,
-    isHistory: String
+    isHistory: String,
+    loginUserName: String
 }, { timestamps: true });
 
 CustomerSchema.plugin(uniqueValidator, { message: 'is already taken' });
@@ -18,7 +20,8 @@ CustomerSchema.methods.toJSONFor = function () {
         address: this.address,
         note: this.note,
         phoneNumber: this.phoneNumber,
-        isHistory: this.isHistory
+        isHistory: this.isHistory,
+        loginUserName: this.loginUserName
     };
 };
 

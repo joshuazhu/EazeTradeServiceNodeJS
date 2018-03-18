@@ -2,6 +2,8 @@ var mongoose = require('mongoose');
 var router = require('express').Router();
 var Customer = mongoose.model('Customer');
 var auth = require('../auth');
+var jwt = require('jsonwebtoken');
+var secret = require('../../config').secret;
 
 router.post('/', auth.required, function (req, res, next) {
   var customer = new Customer();
@@ -9,7 +11,8 @@ router.post('/', auth.required, function (req, res, next) {
   customer.address = req.body.address;
   customer.phoneNumber = req.body.phoneNumber;
   customer.note = req.body.note;
-  customer.isHistory = false
+  customer.isHistory = false;
+  customer.loginUserName = req.body.loginUserName;
 
   customer.save().then(function () {
     return res.status(200).json({
@@ -46,6 +49,23 @@ router.put('/', auth.required, function (req, res, next) {
 });
 
 router.get('/', auth.required, function (req, res, next) {
+  var a = jwt({
+    secret: secret,
+    userProperty: 'payload',
+    getToken: getTokenFromHeader
+  });
+  
+  Customer.find({loginUserName: req.params.loginUserName}).then(function (result) {
+    var customers = result
+    return res.status(200).json({
+      data: customers.map(function (customer) {
+        return customer.toJSONFor()
+      })
+    });
+  }).catch(next);
+});
+
+router.get('/getByName', auth.required, function (req, res, next) {
   Customer.find({}).then(function (result) {
     var customers = result
     return res.status(200).json({
@@ -68,17 +88,6 @@ router.get('/getByName/:customerNames', auth.required, function (req, res, next)
       });
     }
   })
-});
-
-router.get('/getByName', auth.required, function (req, res, next) {
-  Customer.find({}).then(function (result) {
-    var customers = result
-    return res.status(200).json({
-      data: customers.map(function (customer) {
-        return customer.toJSONFor()
-      })
-    });
-  }).catch(next);
 });
 
 router.get('/getById/:customerId', auth.required, function (req, res, next) {
