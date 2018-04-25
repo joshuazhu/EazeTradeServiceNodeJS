@@ -49,12 +49,6 @@ router.put('/', auth.required, function (req, res, next) {
 });
 
 router.get('/', auth.required, function (req, res, next) {
-  var a = jwt({
-    secret: secret,
-    userProperty: 'payload',
-    getToken: getTokenFromHeader
-  });
-  
   Customer.find({loginUserName: req.params.loginUserName}).then(function (result) {
     var customers = result
     return res.status(200).json({
